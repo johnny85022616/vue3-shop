@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0f0e0c;
+  --cream: #faf8f4;
+  --gold: #b8860b;
+  --gold-light: #d4a843;
+  --muted: #6b6560;
+  --border: #e8e3db;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--cream);
+  color: var(--ink);
+}
+
+.font-display {
+  font-family: 'Cormorant Garamond', serif;
+}
