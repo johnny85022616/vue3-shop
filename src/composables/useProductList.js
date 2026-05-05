@@ -6,9 +6,12 @@ import {
   searchProducts,
 } from '@/api/product'
 
+// module-level 快取：整個 app 生命週期只打一次分類 API
+let categoriesCache = null
+
 export function useProductList() {
   const products = ref([])
-  const categories = ref([])
+  const categories = ref(categoriesCache ?? [])
   const loading = ref(false)
   const error = ref(null)
 
@@ -26,11 +29,17 @@ export function useProductList() {
   }
 
   const fetchCategories = async () => {
+    // 已有快取則直接用，不打 API
+    if (categoriesCache) {
+      categories.value = categoriesCache
+      return
+    }
     loading.value = true
     error.value = null
     try {
       const res = await getCategories()
-      categories.value = res.data
+      categoriesCache = res.data
+      categories.value = categoriesCache
     } catch (e) {
       error.value = e.message || '載入分類失敗'
     } finally {
