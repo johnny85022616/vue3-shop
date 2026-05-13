@@ -19,6 +19,7 @@
           type="text"
           placeholder="搜尋商品..."
           class="w-full sm:w-80 border border-border bg-cream text-ink text-sm px-4 py-2.5 outline-none focus:border-ink transition-colors duration-200 placeholder:text-muted"
+          @keyup.enter="doSearch"
         />
       </div>
 
@@ -67,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
@@ -79,8 +80,6 @@ const { products, categories, loading, error, fetchProducts, fetchCategories, fe
 
 const activeCategory = ref('')
 const searchQuery = ref('')
-
-let searchTimer = null
 
 // 點選分類標籤
 const selectCategory = (slug) => {
@@ -94,22 +93,21 @@ const selectCategory = (slug) => {
   }
 }
 
-// 搜尋框 debounce
-watch(searchQuery, (val) => {
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    if (val.trim()) {
-      activeCategory.value = ''
-      router.replace({ query: {} })
-      fetchSearchProducts(val.trim())
-    } else {
-      fetchProducts()
-    }
-  }, 400)
-})
+// 按 Enter 才搜尋
+const doSearch = () => {
+  const val = searchQuery.value.trim()
+  if (val) {
+    activeCategory.value = ''
+    router.replace({ query: {} })
+    fetchSearchProducts(val)
+  } else {
+    fetchProducts()
+  }
+}
 
 onMounted(async () => {
   await fetchCategories()
+  // 頁面載入時如果 URL 有 category 參數，則直接顯示該分類
   const cat = route.query.category
   if (cat) {
     activeCategory.value = cat
