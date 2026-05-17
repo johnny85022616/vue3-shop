@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
@@ -83,15 +83,23 @@ const searchQuery = ref('')
 
 // 點選分類標籤
 const selectCategory = (slug) => {
-  activeCategory.value = slug
   searchQuery.value = ''
   router.replace({ query: slug ? { category: slug } : {} })
-  if (slug) {
-    fetchProductsByCategory(slug)
-  } else {
-    fetchProducts()
-  }
 }
+
+// watch route 變化來驅動 fetch
+watch(
+  () => route.query.category,
+  (cat) => {
+    activeCategory.value = cat ?? ''
+    if (cat) {
+      fetchProductsByCategory(cat)
+    } else {
+      fetchProducts()
+    }
+  },
+  { immediate: true }
+)
 
 // 按 Enter 才搜尋
 const doSearch = () => {
@@ -105,15 +113,7 @@ const doSearch = () => {
   }
 }
 
-onMounted(async () => {
-  await fetchCategories()
-  // 頁面載入時如果 URL 有 category 參數，則直接顯示該分類
-  const cat = route.query.category
-  if (cat) {
-    activeCategory.value = cat
-    fetchProductsByCategory(cat)
-  } else {
-    fetchProducts()
-  }
+onMounted(() => {
+  fetchCategories()
 })
 </script>
