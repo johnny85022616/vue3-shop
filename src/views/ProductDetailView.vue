@@ -122,26 +122,28 @@ const router = useRouter()
 const { product, loading, error, fetchProductById } = useProductDetail()
 const { addItem } = useCart()
 
-const qty = ref(1)
-const added = ref(false)
+const qty = ref(1)      // 使用者選擇的購買數量，最小為 1
+const added = ref(false) // 控制「已加入購物車 ✓」提示的顯示與隱藏
 
+// 載入指定 id 的商品，商品不存在時導回首頁
+// @param id - route.params.id，來自 URL 的商品 id
 const load = async (id) => {
   qty.value = 1
   added.value = false
   await fetchProductById(id)
-  // 8.5：商品不存在時導回首頁
   if (error.value) {
     router.replace({ name: 'Home' })
   }
 }
 
+// 將目前商品加入購物車，並顯示 2 秒的成功提示
 const handleAddToCart = () => {
   addItem({ ...product.value }, qty.value)
   added.value = true
   setTimeout(() => { added.value = false }, 2000)
 }
 
-// 支援同頁換商品（params 改變時重新載入）
+// 支援同頁換商品（例如相關商品連結），params 改變時重新載入
 watch(() => route.params.id, (id) => { if (id) load(id) })
 
 onMounted(() => {
