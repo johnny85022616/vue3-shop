@@ -138,7 +138,7 @@ const load = async (id) => {
 
 // 將目前商品加入購物車，並顯示 2 秒的成功提示
 const handleAddToCart = () => {
-  addItem({ ...product.value }, qty.value)
+  addItem({ ...product.value, quantity: qty.value })
   added.value = true
   setTimeout(() => { added.value = false }, 2000)
 }

@@ -74,7 +74,7 @@
                 <span class="w-8 text-center text-sm font-medium text-ink">{{ item.quantity }}</span>
                 <button
                   class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200"
-                  @click="updateQuantity(item.id, item.quantity + 1)"
+                  @click="increaseQty(item)"
                 >+</button>
               </div>
             </div>
@@ -133,5 +133,9 @@ const { items, totalPrice, removeItem, updateQuantity } = useCart()
 
 function decreaseQty(item) {
   updateQuantity(item.id, item.quantity - 1)
+}
+
+function increaseQty(item) {
+  updateQuantity(item.id, item.quantity + 1)
 }
 </script>
