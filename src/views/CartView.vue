@@ -36,64 +36,64 @@
 
         <!-- 商品列表 -->
         <div class="divide-y divide-border">
-          <div
-            v-for="item in items"
-            :key="item.id"
-            class="grid grid-cols-[auto_1fr] sm:grid-cols-[3fr_1fr_1fr_1fr_auto] gap-4 py-6 items-center"
-          >
-            <!-- 圖片 + 名稱 -->
-            <div class="flex items-center gap-4 col-span-2 sm:col-span-1">
-              <div class="w-20 h-20 flex-shrink-0 bg-white border border-border flex items-center justify-center">
-                <img
-                  :src="item.image"
-                  :alt="item.title"
-                  class="w-full h-full object-contain p-2"
-                />
+          <div v-for="item in items" :key="item.id" class="py-6">
+
+            <!-- 手機版 -->
+            <div class="sm:hidden flex flex-col gap-4">
+              <!-- 第一排：圖片 + 名稱 + 刪除 -->
+              <div class="flex items-start gap-4">
+                <div class="w-20 h-20 flex-shrink-0 bg-white border border-border flex items-center justify-center">
+                  <img :src="item.image" :alt="item.title" class="w-full h-full object-contain p-2" />
+                </div>
+                <RouterLink :to="`/products/${item.id}`" class="flex-1 text-sm font-medium text-ink leading-snug hover:text-gold transition-colors duration-200 line-clamp-2">
+                  {{ item.title }}
+                </RouterLink>
+                <button class="text-muted hover:text-ink transition-colors duration-200 flex-shrink-0" @click="removeItem(item.id)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <RouterLink
-                :to="`/products/${item.id}`"
-                class="text-sm font-medium text-ink leading-snug hover:text-gold transition-colors duration-200 line-clamp-2"
-              >
-                {{ item.title }}
-              </RouterLink>
-            </div>
-
-            <!-- 單價 -->
-            <div class="text-sm text-muted sm:text-right">
-              <span class="sm:hidden text-xs text-muted mr-1">單價</span>
-              ${{ item.price.toFixed(2) }}
-            </div>
-
-            <!-- 數量調整 -->
-            <div class="flex items-center justify-center">
-              <div class="flex items-center border border-border">
-                <button
-                  class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200"
-                  @click="decreaseQty(item)"
-                >−</button>
-                <span class="w-8 text-center text-sm font-medium text-ink">{{ item.quantity }}</span>
-                <button
-                  class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200"
-                  @click="increaseQty(item)"
-                >+</button>
+              <!-- 第二排：單價 + 數量 + 小計 -->
+              <div class="flex items-center gap-3">
+                <span class="text-sm text-muted">單價 ${{ item.price.toFixed(2) }}</span>
+                <div class="flex-1 flex justify-center">
+                  <div class="flex items-center border border-border">
+                    <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="decreaseQty(item)">−</button>
+                    <span class="w-8 text-center text-sm font-medium text-ink">{{ item.quantity }}</span>
+                    <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="increaseQty(item)">+</button>
+                  </div>
+                </div>
+                <span class="text-sm font-medium text-ink">${{ (item.price * item.quantity).toFixed(2) }}</span>
               </div>
             </div>
 
-            <!-- 小計 -->
-            <div class="text-sm font-medium text-ink sm:text-right">
-              ${{ (item.price * item.quantity).toFixed(2) }}
+            <!-- 桌機版 -->
+            <div class="hidden sm:grid grid-cols-[3fr_1fr_1fr_1fr_auto] gap-4 items-center">
+              <div class="flex items-center gap-4">
+                <div class="w-20 h-20 flex-shrink-0 bg-white border border-border flex items-center justify-center">
+                  <img :src="item.image" :alt="item.title" class="w-full h-full object-contain p-2" />
+                </div>
+                <RouterLink :to="`/products/${item.id}`" class="text-sm font-medium text-ink leading-snug hover:text-gold transition-colors duration-200 line-clamp-2">
+                  {{ item.title }}
+                </RouterLink>
+              </div>
+              <div class="text-sm text-muted text-right">${{ item.price.toFixed(2) }}</div>
+              <div class="flex items-center justify-center">
+                <div class="flex items-center border border-border">
+                  <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="decreaseQty(item)">−</button>
+                  <span class="w-8 text-center text-sm font-medium text-ink">{{ item.quantity }}</span>
+                  <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="increaseQty(item)">+</button>
+                </div>
+              </div>
+              <div class="text-sm font-medium text-ink text-right">${{ (item.price * item.quantity).toFixed(2) }}</div>
+              <button class="text-muted hover:text-ink transition-colors duration-200" @click="removeItem(item.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            <!-- 移除 -->
-            <button
-              class="text-muted hover:text-ink transition-colors duration-200"
-              title="移除商品"
-              @click="removeItem(item.id)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
         </div>
 
