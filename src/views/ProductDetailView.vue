@@ -133,6 +133,8 @@ const load = async (id) => {
   await fetchProductById(id)
   if (error.value) {
     router.replace({ name: 'Home' })
+  } else {
+    document.title = `${product.value.title} | vue3-shop`
   }
 }
 
