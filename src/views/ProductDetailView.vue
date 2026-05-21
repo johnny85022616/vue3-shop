@@ -106,35 +106,80 @@
         </div>
       </div>
 
+      <!-- 相關商品 -->
+      <div v-if="relatedProducts.length > 0" class="mt-20">
+        <div class="h-px bg-border mb-12" />
+        <div class="flex items-baseline justify-between mb-8">
+          <div class="flex items-baseline gap-5">
+            <span class="text-[0.7rem] font-medium tracking-[0.2em] text-gold border border-gold py-[0.2rem] px-[0.6rem]">RELATED</span>
+            <h2 class="font-display text-[1.5rem] font-semibold text-ink">相關商品</h2>
+          </div>
+          <RouterLink
+            :to="{ name: 'ProductList', query: { category: product.category } }"
+            class="text-xs font-medium tracking-[0.05em] text-muted hover:text-ink transition-colors duration-200"
+          >
+            查看更多 →
+          </RouterLink>
+        </div>
+
+        <div class="flex gap-4 overflow-x-auto pb-2">
+          <RouterLink
+            v-for="item in relatedProducts"
+            :key="item.id"
+            :to="{ name: 'ProductDetail', params: { id: item.id } }"
+            class="group flex items-center gap-3 flex-shrink-0 w-52 no-underline border border-border hover:border-ink transition-colors duration-200 p-3"
+          >
+            <div class="w-14 h-14 flex-shrink-0 bg-white flex items-center justify-center">
+              <img :src="item.thumbnail" :alt="item.title" class="w-full h-full object-contain" />
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-medium text-ink line-clamp-2 mb-1">{{ item.title }}</p>
+              <p class="text-xs text-gold font-semibold">${{ item.price }}</p>
+            </div>
+          </RouterLink>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { useProductDetail } from '@/composables/useProductDetail'
 import { useCart } from '@/composables/useCart'
+import { getProductsByCategory } from '@/api/product'
 
 const route = useRoute()
 const router = useRouter()
 const { product, loading, error, fetchProductById } = useProductDetail()
 const { addItem } = useCart()
 
-const qty = ref(1)      // 使用者選擇的購買數量，最小為 1
-const added = ref(false) // 控制「已加入購物車 ✓」提示的顯示與隱藏
+const qty = ref(1)              // 使用者選擇的購買數量，最小為 1
+const added = ref(false)        // 控制「已加入購物車 ✓」提示的顯示與隱藏
+const relatedProducts = ref([]) // 同分類的相關商品（最多 3 筆，排除當前商品）
+
+const resetState = () => {
+  qty.value = 1
+  added.value = false
+  relatedProducts.value = []
+}
 
 // 載入指定 id 的商品，商品不存在時導回首頁
 // @param id - route.params.id，來自 URL 的商品 id
 const load = async (id) => {
-  qty.value = 1
-  added.value = false
+  resetState()
   await fetchProductById(id)
   if (error.value) {
     router.replace({ name: 'Home' })
   } else {
     document.title = `${product.value.title} | vue3-shop`
+    const res = await getProductsByCategory(product.value.category)
+    relatedProducts.value = res.data.products
+      .filter(p => p.id !== product.value.id)
+      .slice(0, 3)
   }
 }
 
@@ -145,8 +190,10 @@ const handleAddToCart = () => {
   setTimeout(() => { added.value = false }, 2000)
 }
 
-// 支援同頁換商品（例如相關商品連結），params 改變時重新載入
-watch(() => route.params.id, (id) => { if (id) load(id) })
+// 同頁換商品時（params 改變但元件不重建）重新載入
+onBeforeRouteUpdate((to) => {
+  load(to.params.id)
+})
 
 onMounted(() => {
   load(route.params.id)
