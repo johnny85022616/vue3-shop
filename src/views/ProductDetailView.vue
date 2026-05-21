@@ -176,6 +176,7 @@ const load = async (id) => {
     router.replace({ name: 'Home' })
   } else {
     document.title = `${product.value.title} | vue3-shop`
+    // 取同分類商品，排除當前商品，最多顯示 3 筆
     const res = await getProductsByCategory(product.value.category)
     relatedProducts.value = res.data.products
       .filter(p => p.id !== product.value.id)
