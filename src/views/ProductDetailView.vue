@@ -175,7 +175,11 @@ const load = async (id) => {
   if (error.value) {
     router.replace({ name: 'Home' })
   } else {
+    // 更新頁面 title 為商品實際名稱
     document.title = `${product.value.title} | vue3-shop`
+    // 更新 meta description 為商品實際描述
+    const metaDesc = document.querySelector('meta[name="description"]')
+    if (metaDesc) metaDesc.setAttribute('content', product.value.description)
     // 取同分類商品，排除當前商品，最多顯示 3 筆
     const res = await getProductsByCategory(product.value.category)
     relatedProducts.value = res.data.products
