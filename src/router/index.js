@@ -29,7 +29,12 @@ const routes = [
     path: '/order',
     name: 'Order',
     component: () => import('../views/OrderView.vue'),
-    meta: { title: '訂單確認 | vue3-shop', description: '確認訂單內容並送出' }
+    meta: { title: '訂單確認 | vue3-shop', description: '確認訂單內容並送出' },
+    beforeEnter: () => {
+      // 購物車為空時禁止直接進入訂單頁
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+      if (cart.length === 0) return { name: 'Cart' }
+    }
   },
   {
     path: '/:pathMatch(.*)*',

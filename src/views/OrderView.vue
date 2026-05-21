@@ -79,20 +79,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 import Navbar from '@/components/Navbar.vue'
 import { useCart } from '@/composables/useCart'
 
-const router = useRouter()
 const { items, totalPrice, clearCart } = useCart()
 const submitted = ref(false)
-
-onMounted(() => {
-  if (items.value.length === 0) {
-    router.replace('/cart')
-  }
-})
 
 function handleSubmit() {
   clearCart()
