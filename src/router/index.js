@@ -14,7 +14,7 @@ const routes = [
     meta: { title: '商品列表 | vue3-shop', description: '瀏覽所有精選商品，依分類篩選你喜愛的好物' }
   },
   {
-    path: '/products/:id',
+    path: '/products/:id(\\d+)',
     name: 'ProductDetail',
     component: () => import('../views/ProductDetailView.vue'),
     meta: { title: '商品詳情 | vue3-shop', description: '查看商品詳細資訊' }
