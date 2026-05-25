@@ -68,8 +68,8 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { useProductList } from '@/composables/useProductList'
@@ -87,19 +87,18 @@ const selectCategory = (slug) => {
   router.replace({ query: slug ? { category: slug } : {} })
 }
 
-// watch route 變化來驅動 fetch
-watch(
-  () => route.query.category,
-  (cat) => {
-    activeCategory.value = cat ?? ''
-    if (cat) {
-      fetchProductsByCategory(cat)
-    } else {
-      fetchProducts()
-    }
-  },
-  { immediate: true }
-)
+const loadByCategory = (cat) => {
+  activeCategory.value = cat ?? ''
+  if (cat) {
+    fetchProductsByCategory(cat)
+  } else {
+    fetchProducts()
+  }
+}
+
+onBeforeRouteUpdate((to) => {
+  loadByCategory(to.query.category)
+})
 
 // 按 Enter 才搜尋
 const doSearch = () => {
@@ -115,5 +114,6 @@ const doSearch = () => {
 
 onMounted(() => {
   fetchCategories()
+  loadByCategory(route.query.category)
 })
 </script>
