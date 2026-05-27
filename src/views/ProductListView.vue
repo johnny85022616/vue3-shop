@@ -136,6 +136,14 @@ onMounted(() => {
   observer.observe(sentinel.value)
 })
 
+// function scrollEvent(){
+//   if(window.scrollY + window.innerHeight >= document.documentElement.scrollHeight){
+//     if(hasMore.value){
+//       loadMore(activeCategory.value || undefined)
+//     }
+//   }
+// }
+
 onUnmounted(() => {
   observer?.disconnect()
 })
