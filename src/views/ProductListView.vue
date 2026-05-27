@@ -94,6 +94,7 @@ const selectCategory = (slug) => {
   router.replace({ query: slug ? { category: slug } : {} })
 }
 
+// 依分類載入商品，無分類則載入全部
 const loadByCategory = (cat) => {
   activeCategory.value = cat ?? ''
   if (cat) {
@@ -103,11 +104,12 @@ const loadByCategory = (cat) => {
   }
 }
 
+// 同頁切換 query 時（分類標籤點選）重新載入
 onBeforeRouteUpdate((to) => {
   loadByCategory(to.query.category)
 })
 
-// 按 Enter 才搜尋
+// 按 Enter 才搜尋，搜尋時清空分類
 const doSearch = () => {
   const val = searchQuery.value.trim()
   if (val) {
@@ -125,6 +127,7 @@ onMounted(() => {
   fetchCategories()
   loadByCategory(route.query.category)
 
+  // 哨兵進入畫面時觸發載入更多
   observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && hasMore.value) {
       loadMore(activeCategory.value || undefined)
