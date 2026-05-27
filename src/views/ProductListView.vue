@@ -127,12 +127,12 @@ onMounted(() => {
   fetchCategories()
   loadByCategory(route.query.category)
 
-  // 哨兵進入畫面時觸發載入更多
+  // 哨兵進入畫面時觸發載入更多，rootMargin 提前 100px 觸發避免使用者感覺到延遲
   observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && hasMore.value) {
       loadMore(activeCategory.value || undefined)
     }
-  })
+  }, { rootMargin: '100px' })
   observer.observe(sentinel.value)
 })
 

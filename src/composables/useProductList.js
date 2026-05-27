@@ -21,6 +21,7 @@ export function useProductList() {
   const total = ref(0)           // API 回傳的商品總筆數
   const hasMore = ref(false)     // 是否還有更多商品可以載入
 
+  // 載入全部商品第一頁，重置分頁狀態
   const fetchProducts = async () => {
     loading.value = true
     error.value = null
@@ -38,6 +39,7 @@ export function useProductList() {
     }
   }
 
+  // 追加下一批商品，有分類時依分類追加，否則追加全部
   const loadMore = async (category) => {
     if (loadingMore.value || !hasMore.value) return
     loadingMore.value = true
@@ -55,8 +57,8 @@ export function useProductList() {
     }
   }
 
+  // 載入所有分類，有快取則直接用，不重複打 API
   const fetchCategories = async () => {
-    // 已有快取則直接用，不打 API
     if (categoriesCache) {
       categories.value = categoriesCache
       return
@@ -74,6 +76,7 @@ export function useProductList() {
     }
   }
 
+  // 載入指定分類的第一頁，重置分頁狀態
   const fetchProductsByCategory = async (category) => {
     loading.value = true
     error.value = null
@@ -91,6 +94,7 @@ export function useProductList() {
     }
   }
 
+  // 搜尋商品，搜尋結果不支援 infinite scroll
   const fetchSearchProducts = async (query) => {
     loading.value = true
     error.value = null
