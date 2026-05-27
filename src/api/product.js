@@ -18,8 +18,8 @@ export const getCategories = () =>
   http.get('/products/categories')
 
 // 依分類取得商品
-export const getProductsByCategory = (category) =>
-  http.get(`/products/category/${category}`)
+export const getProductsByCategory = (category, { limit = 20, skip = 0 } = {}) =>
+  http.get(`/products/category/${category}`, { params: { limit, skip } })
 
 // 搜尋商品
 export const searchProducts = (query) =>

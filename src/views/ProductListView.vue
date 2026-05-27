@@ -63,12 +63,18 @@
         />
       </div>
 
+      <!-- 載入更多 spinner -->
+      <p v-if="loadingMore" class="text-center text-muted text-sm py-6">載入中...</p>
+
+      <!-- 哨兵：進入畫面時觸發載入更多 -->
+      <div ref="sentinel" class="h-1" />
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
@@ -76,10 +82,11 @@ import { useProductList } from '@/composables/useProductList'
 
 const route = useRoute()
 const router = useRouter()
-const { products, categories, loading, error, fetchProducts, fetchCategories, fetchProductsByCategory, fetchSearchProducts } = useProductList()
+const { products, categories, loading, loadingMore, error, hasMore, fetchProducts, fetchCategories, fetchProductsByCategory, fetchSearchProducts, loadMore } = useProductList()
 
 const activeCategory = ref('')
 const searchQuery = ref('')
+const sentinel = ref(null)
 
 // 點選分類標籤
 const selectCategory = (slug) => {
@@ -112,8 +119,21 @@ const doSearch = () => {
   }
 }
 
+let observer = null
+
 onMounted(() => {
   fetchCategories()
   loadByCategory(route.query.category)
+
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && hasMore.value) {
+      loadMore(activeCategory.value || undefined)
+    }
+  })
+  observer.observe(sentinel.value)
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
 })
 </script>
