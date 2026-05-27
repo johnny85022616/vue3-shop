@@ -95,12 +95,12 @@ const selectCategory = (slug) => {
 }
 
 // 依分類載入商品，無分類則載入全部
-const loadByCategory = (cat) => {
+const loadByCategory = async (cat) => {
   activeCategory.value = cat ?? ''
   if (cat) {
-    fetchProductsByCategory(cat)
+    await fetchProductsByCategory(cat)
   } else {
-    fetchProducts()
+    await fetchProducts()
   }
 }
 
@@ -123,10 +123,11 @@ const doSearch = () => {
 
 let observer = null
 
-onMounted(() => {
+onMounted(async () => {
   fetchCategories()
-  loadByCategory(route.query.category)
+  await loadByCategory(route.query.category)
 
+  // 等第一頁載完後再開始觀察，確保 hasMore 已有正確值
   // 哨兵進入畫面時觸發載入更多，rootMargin 提前 100px 觸發避免使用者感覺到延遲
   observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && hasMore.value) {
