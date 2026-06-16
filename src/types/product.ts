@@ -18,7 +18,7 @@ export interface Category {
 }
 
 // 對應 /products、/products/category/:slug、/products/search 的回傳格式
-export interface ProductsResponse {
+export interface ProductListResponse {
   products: Product[]
   total: number
   skip: number
