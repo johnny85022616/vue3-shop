@@ -28,8 +28,8 @@ export function useProductList() {
     skip.value = 0
     try {
       const res = await getProducts({ limit: LIMIT, skip: 0 })
-      products.value = res.data.products
-      total.value = res.data.total
+      products.value = res.products
+      total.value = res.total
       hasMore.value = products.value.length < total.value
       skip.value = products.value.length
     } catch (e) {
@@ -47,7 +47,7 @@ export function useProductList() {
       const res = category
         ? await getProductsByCategory(category, { limit: LIMIT, skip: skip.value })
         : await getProducts({ limit: LIMIT, skip: skip.value })
-      products.value = [...products.value, ...res.data.products]
+      products.value = [...products.value, ...res.products]
       skip.value = products.value.length
       hasMore.value = products.value.length < total.value
     } catch (e) {
@@ -66,8 +66,7 @@ export function useProductList() {
     loading.value = true
     error.value = null
     try {
-      const res = await getCategories()
-      categoriesCache = res.data
+      categoriesCache = await getCategories()
       categories.value = categoriesCache
     } catch (e) {
       error.value = e.message || '載入分類失敗'
@@ -83,8 +82,8 @@ export function useProductList() {
     skip.value = 0
     try {
       const res = await getProductsByCategory(category, { limit: LIMIT, skip: 0 })
-      products.value = res.data.products
-      total.value = res.data.total
+      products.value = res.products
+      total.value = res.total
       hasMore.value = products.value.length < total.value
       skip.value = products.value.length
     } catch (e) {
@@ -102,8 +101,8 @@ export function useProductList() {
     hasMore.value = false
     try {
       const res = await searchProducts(query)
-      products.value = res.data.products
-      total.value = res.data.total
+      products.value = res.products
+      total.value = res.total
     } catch (e) {
       error.value = e.message || '搜尋失敗'
     } finally {

@@ -11,8 +11,7 @@ export function useProductDetail() {
     error.value = null
     product.value = null
     try {
-      const res = await getProductById(id)
-      product.value = res.data
+      product.value = await getProductById(id)
     } catch (e) {
       error.value = e.message || '載入商品詳情失敗'
     } finally {

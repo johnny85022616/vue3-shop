@@ -182,7 +182,7 @@ const load = async (id) => {
     if (metaDesc) metaDesc.setAttribute('content', product.value.description)
     // 取同分類商品，排除當前商品，最多顯示 3 筆
     const res = await getProductsByCategory(product.value.category)
-    relatedProducts.value = res.data.products
+    relatedProducts.value = res.products
       .filter(p => p.id !== product.value.id)
       .slice(0, 3)
   }
