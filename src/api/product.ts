@@ -40,3 +40,4 @@ export const searchProducts = async (query: string): Promise<ProductListResponse
   const res = await http.get<ProductListResponse>('/products/search', { params: { q: query } })
   return res.data
 }
+

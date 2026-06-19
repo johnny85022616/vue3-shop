@@ -1,9 +1,11 @@
+import { CartItem } from '@/types/cartItem'
+import { Product } from '@/types/product'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
 export const useCartStore = defineStore('cart', () => {
   // State
-  const items = ref([])
+  const items = ref<CartItem[]>([])
 
   // 初始化：從 localStorage 讀取購物車數據
   const initializeCart = () => {
@@ -28,7 +30,7 @@ export const useCartStore = defineStore('cart', () => {
   )
 
   // Actions
-  const addItem = (product) => {
+  const addItem = (product: Product & { quantity: number }) => {
     // 檢查商品是否已存在購物車
     const existingItem = items.value.find((item) => item.id === product.id)
 
@@ -41,17 +43,17 @@ export const useCartStore = defineStore('cart', () => {
         id: product.id,
         title: product.title,
         price: product.price,
-        image: product.image || product.thumbnail,
+        image: product.thumbnail,
         quantity: product.quantity || 1,
       })
     }
   }
 
-  const removeItem = (productId) => {
+  const removeItem = (productId: number) => {
     items.value = items.value.filter((item) => item.id !== productId)
   }
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (productId: number, quantity: number) => {
     const item = items.value.find((item) => item.id === productId)
     if (item) {
       if (quantity <= 0) {
