@@ -34,34 +34,35 @@
       <div class="mt-16 h-px bg-border" />
     </section>
 
-    <!-- 分類 -->
+    <!-- 分類商品 -->
     <section class="max-w-6xl mx-auto px-8 pt-16 pb-24">
-      <div class="flex items-baseline gap-5 mb-10">
+      <div class="flex items-baseline gap-5 mb-12">
         <span class="text-[0.7rem] font-medium tracking-[0.2em] text-gold border border-gold py-[0.2rem] px-[0.6rem]">
           CATEGORIES
         </span>
         <h2 class="font-display text-[2rem] font-semibold text-ink">商品分類</h2>
       </div>
 
-      <!-- 載入中 -->
-      <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-border border border-border">
-        <div v-for="n in 12" :key="n" class="min-h-[90px] bg-border animate-pulse" />
+      <!-- 載入分類中 -->
+      <div v-if="loading" class="space-y-20">
+        <div v-for="n in 3" :key="n">
+          <div class="h-6 w-32 bg-border animate-pulse rounded mb-8" />
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div v-for="m in 6" :key="m" class="aspect-[3/4] bg-border animate-pulse rounded" />
+          </div>
+        </div>
       </div>
 
       <!-- 錯誤 -->
       <p v-else-if="error" class="text-red-700 text-sm">{{ error }}</p>
 
-      <!-- 分類卡片 -->
-      <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-border border border-border">
-        <button
+      <!-- 每個分類各自 lazy load -->
+      <div v-else>
+        <CategorySection
           v-for="category in categories"
           :key="category.slug"
-          class="group flex flex-col items-start justify-between bg-cream p-5 cursor-pointer border-none transition-colors duration-200 text-left min-h-[90px] hover:bg-ink hover:text-cream"
-          @click="goToCategory(category.slug)"
-        >
-          <span class="text-[0.82rem] font-medium capitalize leading-[1.4]">{{ category.name }}</span>
-          <span class="text-[0.9rem] opacity-0 transition-opacity duration-200 group-hover:opacity-100">↗</span>
-        </button>
+          :category="category"
+        />
       </div>
     </section>
 
@@ -74,16 +75,11 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
+import CategorySection from '@/components/CategorySection.vue'
 import { useProductList } from '@/composables/useProductList'
 
-const router = useRouter()
 const { categories, loading, error, fetchCategories } = useProductList()
-
-const goToCategory = (slug) => {
-  router.push({ name: 'ProductList', query: { category: slug } })
-}
 
 onMounted(() => {
   fetchCategories()

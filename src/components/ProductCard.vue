@@ -33,11 +33,8 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  product: {
-    type: Object,
-    required: true,
-  },
-})
+<script setup lang="ts">
+import type { Product } from '@/types/product'
+
+defineProps<{ product: Product }>()
 </script>
