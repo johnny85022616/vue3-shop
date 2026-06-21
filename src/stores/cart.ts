@@ -1,5 +1,5 @@
-import { CartItem } from '@/types/cartItem'
-import { Product } from '@/types/product'
+import type { CartItem } from '@/types/cartItem'
+import type { Product } from '@/types/product'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 

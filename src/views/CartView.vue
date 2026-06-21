@@ -126,7 +126,7 @@
 <script setup lang="ts">
 import Navbar from '@/components/Navbar.vue'
 import { useCart } from '@/composables/useCart'
-import { CartItem } from '../types/cartItem'
+import type { CartItem } from '@/types/cartItem'
 
 const { items, totalPrice, removeItem, updateQuantity } = useCart()
 

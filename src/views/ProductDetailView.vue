@@ -151,7 +151,7 @@ import Navbar from '@/components/Navbar.vue'
 import { useProductDetail } from '@/composables/useProductDetail'
 import { useCart } from '@/composables/useCart'
 import { getProductsByCategory } from '@/api/product'
-import { Product } from '@/types/product'
+import type { Product } from '@/types/product'
 
 const route = useRoute()
 const router = useRouter()
