@@ -107,7 +107,7 @@
       </div>
 
       <!-- 相關商品 -->
-      <div v-if="relatedProducts.length > 0" class="mt-20">
+      <div v-if="product && relatedProducts.length > 0" class="mt-20">
         <div class="h-px bg-border mb-12" />
         <div class="flex items-baseline justify-between mb-8">
           <div class="flex items-baseline gap-5">
@@ -144,13 +144,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { useProductDetail } from '@/composables/useProductDetail'
 import { useCart } from '@/composables/useCart'
 import { getProductsByCategory } from '@/api/product'
+import { Product } from '@/types/product'
 
 const route = useRoute()
 const router = useRouter()
@@ -159,7 +160,7 @@ const { addItem } = useCart()
 
 const qty = ref(1)              // 使用者選擇的購買數量，最小為 1
 const added = ref(false)        // 控制「已加入購物車 ✓」提示的顯示與隱藏
-const relatedProducts = ref([]) // 同分類的相關商品（最多 3 筆，排除當前商品）
+const relatedProducts = ref<Product[]>([]) // 同分類的相關商品（最多 3 筆，排除當前商品）
 
 const resetState = () => {
   qty.value = 1
@@ -169,12 +170,13 @@ const resetState = () => {
 
 // 載入指定 id 的商品，商品不存在時導回首頁
 // @param id - route.params.id，來自 URL 的商品 id
-const load = async (id) => {
+const load = async (id: string) => {
   resetState()
   await fetchProductById(id)
   if (error.value) {
     router.replace({ name: 'Home' })
   } else {
+    if(!product.value) return
     // 更新頁面 title 為商品實際名稱
     document.title = `${product.value.title} | vue3-shop`
     // 更新 meta description 為商品實際描述
@@ -182,14 +184,16 @@ const load = async (id) => {
     if (metaDesc) metaDesc.setAttribute('content', product.value.description)
     // 取同分類商品，排除當前商品，最多顯示 3 筆
     const res = await getProductsByCategory(product.value.category)
+    if(!res.products) return
     relatedProducts.value = res.products
-      .filter(p => p.id !== product.value.id)
+      .filter(p => p.id !== product.value?.id)
       .slice(0, 3)
   }
 }
 
 // 將目前商品加入購物車，並顯示 2 秒的成功提示
 const handleAddToCart = () => {
+  if (!product.value) return
   addItem({ ...product.value, quantity: qty.value })
   added.value = true
   setTimeout(() => { added.value = false }, 2000)
@@ -197,10 +201,10 @@ const handleAddToCart = () => {
 
 // 同頁換商品時（params 改變但元件不重建）重新載入
 onBeforeRouteUpdate((to) => {
-  load(to.params.id)
+  load(to.params.id as string)
 })
 
 onMounted(() => {
-  load(route.params.id)
+  load(route.params.id as string)
 })
 </script>

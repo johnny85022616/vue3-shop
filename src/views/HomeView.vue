@@ -73,7 +73,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue'
 import Navbar from '@/components/Navbar.vue'
 import CategorySection from '@/components/CategorySection.vue'

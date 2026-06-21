@@ -73,7 +73,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
@@ -86,16 +86,16 @@ const { products, categories, loading, loadingMore, error, hasMore, fetchProduct
 
 const activeCategory = ref('')
 const searchQuery = ref('')
-const sentinel = ref(null)
+const sentinel = ref<HTMLElement | null>(null)
 
 // 點選分類標籤
-const selectCategory = (slug) => {
+const selectCategory = (slug: string) => {
   searchQuery.value = ''
   router.replace({ query: slug ? { category: slug } : {} })
 }
 
 // 依分類載入商品，無分類則載入全部
-const loadByCategory = async (cat) => {
+const loadByCategory = async (cat: string | undefined) => {
   activeCategory.value = cat ?? ''
   if (cat) {
     await fetchProductsByCategory(cat)
@@ -106,7 +106,7 @@ const loadByCategory = async (cat) => {
 
 // 同頁切換 query 時（分類標籤點選）重新載入
 onBeforeRouteUpdate((to) => {
-  loadByCategory(to.query.category)
+  loadByCategory(to.query.category as string | undefined)
 })
 
 // 按 Enter 才搜尋，搜尋時清空分類
@@ -121,11 +121,11 @@ const doSearch = () => {
   }
 }
 
-let observer = null
+let observer: IntersectionObserver | null = null
 
 onMounted(async () => {
   fetchCategories()
-  await loadByCategory(route.query.category)
+  await loadByCategory(route.query.category as string | undefined)
 
   // 等第一頁載完後再開始觀察，確保 hasMore 已有正確值
   // 哨兵進入畫面時觸發載入更多，rootMargin 提前 100px 觸發避免使用者感覺到延遲
@@ -134,7 +134,8 @@ onMounted(async () => {
       loadMore(activeCategory.value || undefined)
     }
   }, { rootMargin: '100px' })
-  observer.observe(sentinel.value)
+
+  if(sentinel.value) observer.observe(sentinel.value)
 })
 
 // function scrollEvent(){

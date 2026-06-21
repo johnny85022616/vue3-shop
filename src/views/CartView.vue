@@ -123,19 +123,18 @@
   </div>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router'
+<script setup lang="ts">
 import Navbar from '@/components/Navbar.vue'
 import { useCart } from '@/composables/useCart'
+import { CartItem } from '../types/cartItem'
 
-const router = useRouter()
 const { items, totalPrice, removeItem, updateQuantity } = useCart()
 
-function decreaseQty(item) {
+function decreaseQty(item: CartItem) {
   updateQuantity(item.id, item.quantity - 1)
 }
 
-function increaseQty(item) {
+function increaseQty(item: CartItem) {
   updateQuantity(item.id, item.quantity + 1)
 }
 </script>
