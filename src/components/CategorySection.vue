@@ -34,13 +34,13 @@ import ProductCard from '@/components/ProductCard.vue'
 
 const props = defineProps<{ category: Category }>()
 
-const sectionRef = ref<HTMLElement | null>(null)
-const products = ref<Product[]>([])
-const loading = ref(false)
-const error = ref<string | null>(null)
-const hasLoaded = ref(false)
+const sectionRef = ref<HTMLElement | null>(null) // 綁定 section 元素，供 IntersectionObserver 觀察
+const products = ref<Product[]>([])              // 該分類的商品列表
+const loading = ref(false)                       // 是否正在載入
+const error = ref<string | null>(null)           // 錯誤訊息
+const hasLoaded = ref(false)                     // 是否已載入過，避免重複打 API
 
-let observer: IntersectionObserver | null = null
+let observer: IntersectionObserver | null = null // 觀察 section 是否進入視窗的實例
 
 const loadProducts = async () => {
   if (hasLoaded.value) return

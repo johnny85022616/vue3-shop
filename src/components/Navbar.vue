@@ -37,7 +37,7 @@
   </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useCart } from '@/composables/useCart'
 
 const { itemCount } = useCart()
