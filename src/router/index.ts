@@ -1,6 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
-const routes = [
+// 擴充 vue-router 的 RouteMeta，加入專案自訂欄位
+declare module 'vue-router' {
+  interface RouteMeta {
+    title?: string
+    description?: string
+  }
+}
+
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
