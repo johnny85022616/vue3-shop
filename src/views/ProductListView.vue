@@ -24,24 +24,51 @@
       </div>
 
       <!-- 分類標籤 -->
-      <div class="flex flex-wrap gap-2 mb-10">
-        <button
-          class="text-xs font-medium tracking-[0.05em] px-4 py-1.5 border transition-colors duration-200"
-          :class="activeCategory === '' ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border hover:border-ink'"
-          @click="selectCategory('')"
-        >
-          全部
-        </button>
-        <button
-          v-for="cat in categories"
-          :key="cat.slug"
-          class="text-xs font-medium tracking-[0.05em] px-4 py-1.5 border capitalize transition-colors duration-200"
-          :class="activeCategory === cat.slug ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border hover:border-ink'"
-          @click="selectCategory(cat.slug)"
-        >
-          {{ cat.name }}
-        </button>
+      <div class="mb-10">
+        <!-- 手機：前 5 個橫滑 + 更多按鈕 -->
+        <div class="flex sm:hidden overflow-x-auto gap-2 -mx-8 px-8 pb-1 [&::-webkit-scrollbar]:hidden">
+          <button
+            class="shrink-0 text-xs font-medium tracking-[0.05em] px-4 py-2 border transition-colors duration-200"
+            :class="activeCategory === '' ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border'"
+            @click="selectCategory('')"
+          >全部</button>
+          <button
+            v-for="cat in categories.slice(0, 5)"
+            :key="cat.slug"
+            class="shrink-0 text-xs font-medium tracking-[0.05em] px-4 py-2 border capitalize transition-colors duration-200"
+            :class="activeCategory === cat.slug ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border'"
+            @click="selectCategory(cat.slug)"
+          >{{ cat.name }}</button>
+          <button
+            class="shrink-0 text-xs font-medium tracking-[0.05em] px-4 py-2 border border-border text-muted"
+            @click="showCategorySheet = true"
+          >更多 ↓</button>
+        </div>
+
+        <!-- 桌機：全部換行 -->
+        <div class="hidden sm:flex flex-wrap gap-2">
+          <button
+            class="text-xs font-medium tracking-[0.05em] px-4 py-1.5 border transition-colors duration-200"
+            :class="activeCategory === '' ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border hover:border-ink'"
+            @click="selectCategory('')"
+          >全部</button>
+          <button
+            v-for="cat in categories"
+            :key="cat.slug"
+            class="text-xs font-medium tracking-[0.05em] px-4 py-1.5 border capitalize transition-colors duration-200"
+            :class="activeCategory === cat.slug ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border hover:border-ink'"
+            @click="selectCategory(cat.slug)"
+          >{{ cat.name }}</button>
+        </div>
       </div>
+
+      <!-- 手機分類 Bottom Sheet -->
+      <CategorySheet
+        v-model="showCategorySheet"
+        :categories="categories"
+        :active-category="activeCategory"
+        @select="selectCategory"
+      />
 
       <!-- 載入中 skeleton -->
       <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -78,15 +105,17 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
+import CategorySheet from '@/components/CategorySheet.vue'
 import { useProductList } from '@/composables/useProductList'
 
 const route = useRoute()
 const router = useRouter()
 const { products, categories, loading, loadingMore, error, hasMore, fetchProducts, fetchCategories, fetchProductsByCategory, fetchSearchProducts, loadMore } = useProductList()
 
-const activeCategory = ref('')
-const searchQuery = ref('')
-const sentinel = ref<HTMLElement | null>(null)
+const activeCategory = ref('')              // 目前選中的分類 slug，空字串表示「全部」
+const searchQuery = ref('')                 // 搜尋框的輸入值
+const showCategorySheet = ref(false)        // 控制手機版分類 bottom sheet 的開關
+const sentinel = ref<HTMLElement | null>(null) // 哨兵元素，進入視窗時觸發載入更多
 
 // 點選分類標籤
 const selectCategory = (slug: string) => {
