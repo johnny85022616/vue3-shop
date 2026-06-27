@@ -27,10 +27,18 @@
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          <span v-if="itemCount > 0" class="cart-badge">
+          <span v-if="isLoggedIn && itemCount > 0" class="cart-badge">
             {{ itemCount > 99 ? '99+' : itemCount }}
           </span>
         </RouterLink>
+
+        <button
+          type="button"
+          class="auth-btn"
+          @click="handleAuthClick"
+        >
+          {{ isLoggedIn ? '登出' : '登入' }}
+        </button>
       </div>
     </div>
     <div class="nav-border" />
@@ -38,9 +46,44 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useCart } from '@/composables/useCart'
+import { clearFaToken, hasFaToken } from '@/utils/auth'
 
 const { itemCount } = useCart()
+
+const route = useRoute()
+const router = useRouter()
+const isLoggedIn = ref(false)
+
+const syncAuthState = () => {
+  isLoggedIn.value = hasFaToken()
+}
+
+watch(
+  () => route.fullPath,
+  () => syncAuthState(),
+  { immediate: true }
+)
+
+const handleAuthClick = async () => {
+  if (isLoggedIn.value) {
+    clearFaToken()
+    syncAuthState()
+
+    if (route.meta.requiresAuth) {
+      await router.push({ name: 'Home' })
+    }
+    return
+  }
+
+  if (route.name === 'Login') {
+    return
+  }
+
+  await router.push({ name: 'Login', query: { redirect: route.fullPath } })
+}
 </script>
 
 <style scoped>
@@ -146,6 +189,22 @@ const { itemCount } = useCart()
   align-items: center;
   justify-content: center;
   padding: 0 3px;
+}
+
+.auth-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  padding: 0.38rem 0.7rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.auth-btn:hover {
+  color: var(--ink);
+  border-color: var(--gold);
 }
 
 .nav-border {

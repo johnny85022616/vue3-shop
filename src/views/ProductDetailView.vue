@@ -152,6 +152,7 @@ import { useProductDetail } from '@/composables/useProductDetail'
 import { useCart } from '@/composables/useCart'
 import { getProductsByCategory } from '@/api/product'
 import type { Product } from '@/types/product'
+import { hasFaToken } from '@/utils/auth'
 
 const route = useRoute()
 const router = useRouter()
@@ -193,6 +194,14 @@ const load = async (id: string) => {
 
 // 將目前商品加入購物車，並顯示 2 秒的成功提示
 const handleAddToCart = () => {
+  if (!hasFaToken()) {
+    router.push({
+      name: 'Login',
+      query: { redirect: route.fullPath },
+    })
+    return
+  }
+
   if (!product.value) return
   addItem({ ...product.value, quantity: qty.value })
   added.value = true
