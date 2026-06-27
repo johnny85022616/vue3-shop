@@ -57,21 +57,25 @@ const route = useRoute()
 const router = useRouter()
 const isLoggedIn = ref(false)
 
+// 依照目前 cookie 狀態更新導覽列的登入/登出按鈕文字
 const syncAuthState = () => {
   isLoggedIn.value = hasFaToken()
 }
 
+// 路由切換時同步登入狀態，避免登入/登出後按鈕文案不同步
 watch(
   () => route.fullPath,
   () => syncAuthState(),
   { immediate: true }
 )
 
+// 處理登入/登出按鈕：已登入則登出，未登入則導向登入頁並帶回跳位置
 const handleAuthClick = async () => {
   if (isLoggedIn.value) {
     clearFaToken()
     syncAuthState()
 
+    // 登出後若仍在需登入頁，主動導回首頁避免停留在受保護路由
     if (route.meta.requiresAuth) {
       await router.push({ name: 'Home' })
     }
