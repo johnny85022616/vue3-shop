@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { hasFaToken } from '@/utils/auth'
+import HomeView from '../views/HomeView.vue'
 
 // 擴充 vue-router 的 RouteMeta，加入專案自訂欄位
 declare module 'vue-router' {
@@ -15,7 +16,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../views/HomeView.vue'),
+    component: HomeView,
     meta: { title: '首頁 | vue3-shop', description: '探索每一件值得擁有的好物，從日常必需到精緻配件' }
   },
   {
