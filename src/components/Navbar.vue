@@ -1,11 +1,14 @@
 <template>
-  <nav class="navbar">
-    <div class="nav-inner">
-      <RouterLink to="/" class="nav-logo">
-        <span class="logo-main font-display">Vue Shop</span>
+  <nav class="sticky top-0 z-50 bg-cream">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+
+      <RouterLink to="/" class="no-underline">
+        <span class="font-display text-2xl font-semibold text-ink tracking-wide hover:text-gold transition-colors duration-200">
+          Vue Shop
+        </span>
       </RouterLink>
 
-      <div class="nav-links">
+      <div class="flex items-center gap-4">
         <RouterLink
           to="/"
           class="nav-link"
@@ -21,27 +24,29 @@
           商品列表
         </RouterLink>
 
-        <RouterLink to="/cart" class="cart-link">
-          <svg xmlns="http://www.w3.org/2000/svg" class="cart-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <RouterLink to="/cart" class="relative text-muted hover:text-ink transition-colors duration-200 flex">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-[1.4rem] h-[1.4rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          <span v-if="isLoggedIn && itemCount > 0" class="cart-badge">
+          <span v-if="isLoggedIn && itemCount > 0"
+            class="absolute -top-2 -right-2 bg-gold text-white text-[0.65rem] font-semibold rounded-full h-4 min-w-[1rem] flex items-center justify-center px-[3px]"
+          >
             {{ itemCount > 99 ? '99+' : itemCount }}
           </span>
         </RouterLink>
 
         <button
           type="button"
-          class="auth-btn"
+          class="border border-border bg-transparent text-muted text-[0.78rem] tracking-[0.06em] px-[0.7rem] py-[0.38rem] rounded transition-all duration-200 hover:text-ink hover:border-gold"
           @click="handleAuthClick"
         >
           {{ isLoggedIn ? '登出' : '登入' }}
         </button>
       </div>
     </div>
-    <div class="nav-border" />
+    <div class="h-px bg-border" />
   </nav>
 </template>
 
@@ -52,85 +57,27 @@ import { useCart } from '@/composables/useCart'
 import { clearFaToken, hasFaToken } from '@/utils/auth'
 
 const { itemCount } = useCart()
-
 const route = useRoute()
 const router = useRouter()
 const isLoggedIn = ref(false)
 
-// 依照目前 cookie 狀態更新導覽列的登入/登出按鈕文字
-const syncAuthState = () => {
-  isLoggedIn.value = hasFaToken()
-}
+const syncAuthState = () => { isLoggedIn.value = hasFaToken() }
 
-// 路由切換時同步登入狀態，避免登入/登出後按鈕文案不同步
-watch(
-  () => route.fullPath,
-  () => syncAuthState(),
-  { immediate: true }
-)
+watch(() => route.fullPath, () => syncAuthState(), { immediate: true })
 
-// 處理登入/登出按鈕：已登入則登出，未登入則導向登入頁並帶回跳位置
 const handleAuthClick = async () => {
   if (isLoggedIn.value) {
     clearFaToken()
     syncAuthState()
-
-    // 登出後若仍在需登入頁，主動導回首頁避免停留在受保護路由
-    if (route.meta.requiresAuth) {
-      await router.push({ name: 'Home' })
-    }
+    if (route.meta.requiresAuth) await router.push({ name: 'Home' })
     return
   }
-
-  if (route.name === 'Login') {
-    return
-  }
-
+  if (route.name === 'Login') return
   await router.push({ name: 'Login', query: { redirect: route.fullPath } })
 }
 </script>
 
 <style scoped>
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--cream);
-}
-
-.nav-inner {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 0 2rem;
-  height: 4rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.nav-logo {
-  text-decoration: none;
-}
-
-.logo-main {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--ink);
-  letter-spacing: 0.02em;
-  transition: color 0.2s;
-}
-
-.logo-main:hover {
-  color: var(--gold);
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
 .nav-link {
   font-size: 0.85rem;
   font-weight: 400;
@@ -160,59 +107,5 @@ const handleAuthClick = async () => {
 .nav-link:hover::after,
 .nav-link.active::after {
   width: 100%;
-}
-
-.cart-link {
-  position: relative;
-  color: var(--muted);
-  transition: color 0.2s;
-  display: flex;
-}
-
-.cart-link:hover {
-  color: var(--ink);
-}
-
-.cart-icon {
-  width: 1.4rem;
-  height: 1.4rem;
-}
-
-.cart-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: var(--gold);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 600;
-  border-radius: 9999px;
-  height: 1.1rem;
-  min-width: 1.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-}
-
-.auth-btn {
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  padding: 0.38rem 0.7rem;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.auth-btn:hover {
-  color: var(--ink);
-  border-color: var(--gold);
-}
-
-.nav-border {
-  height: 1px;
-  background: var(--border);
 }
 </style>
