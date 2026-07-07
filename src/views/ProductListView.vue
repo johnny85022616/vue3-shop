@@ -101,21 +101,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import CategorySheet from '@/components/CategorySheet.vue'
 import { useProductList } from '@/composables/useProductList'
+import { useIntersectionObserver } from '@/composables/useIntersectionObserver'
 
 const route = useRoute()
 const router = useRouter()
 const { products, categories, loading, loadingMore, error, hasMore, fetchProducts, fetchCategories, fetchProductsByCategory, fetchSearchProducts, loadMore } = useProductList()
+const { sentinel } = useIntersectionObserver(
+  () => {
+    if (hasMore.value) loadMore(activeCategory.value || undefined)
+  },
+  { rootMargin: '100px' }
+)
 
 const activeCategory = ref('')              // 目前選中的分類 slug，空字串表示「全部」
 const searchQuery = ref('')                 // 搜尋框的輸入值
 const showCategorySheet = ref(false)        // 控制手機版分類 bottom sheet 的開關
-const sentinel = ref<HTMLElement | null>(null) // 哨兵元素，進入視窗時觸發載入更多
 
 // 點選分類標籤
 const selectCategory = (slug: string) => {
@@ -150,32 +156,8 @@ const doSearch = () => {
   }
 }
 
-let observer: IntersectionObserver | null = null
-
 onMounted(async () => {
   fetchCategories()
   await loadByCategory(route.query.category as string | undefined)
-
-  // 等第一頁載完後再開始觀察，確保 hasMore 已有正確值
-  // 哨兵進入畫面時觸發載入更多，rootMargin 提前 100px 觸發避免使用者感覺到延遲
-  observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && hasMore.value) {
-      loadMore(activeCategory.value || undefined)
-    }
-  }, { rootMargin: '100px' })
-
-  if(sentinel.value) observer.observe(sentinel.value)
-})
-
-// function scrollEvent(){
-//   if(window.scrollY + window.innerHeight >= document.documentElement.scrollHeight){
-//     if(hasMore.value){
-//       loadMore(activeCategory.value || undefined)
-//     }
-//   }
-// }
-
-onUnmounted(() => {
-  observer?.disconnect()
 })
 </script>
