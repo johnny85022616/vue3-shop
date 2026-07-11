@@ -8,6 +8,4 @@ test('登出狀態下前往購物車，自動跳登入，登入後返回購物�
 
   await page.click('button[type="submit"]')
   await expect(page).toHaveURL('/cart')
-
-  await page.pause()
 })
