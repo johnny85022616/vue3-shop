@@ -13,11 +13,13 @@ description: 啟動 vue3-shop 的 dev server 並執行 Playwright e2e 測試；�
 
 ## 何時用 e2e，何時 Vitest 就夠
 
+判斷的關鍵不是「這是不是 function/computed」，而是**這個行為能不能在 jsdom（模擬瀏覽器的假環境）裡驗證出來，不需要真實瀏覽器、不需要真的跨頁跳轉**——能就用 Vitest，不能才需要 Playwright。
+
 | 變更類型 | 用什麼驗證 | 原因 |
 |---|---|---|
-| 單一 function／computed／store getter 邏輯（如 `useCartStore` 的 `totalPrice`、`useProductList` 的分頁邏輯） | Vitest 單元測試 | 邏輯可獨立驗證，不需真實瀏覽器，跑得快 |
+| 不需要真實瀏覽器/跨頁就能驗證的行為：單一 function／computed／store getter 邏輯（如 `useCartStore` 的 `totalPrice`、`useProductList` 的分頁邏輯），或單頁內由狀態／API 回傳值驅動的顯示/樣式變化（`v-if`、條件 class，例如收藏後愛心變紅、某個 key 決定區塊顯示/隱藏） | Vitest 單元測試（後者需搭配 `@vue/test-utils` mount component 斷言 DOM/class） | 邏輯可在 jsdom 裡獨立驗證，不需真實瀏覽器，跑得快 |
 | 跨頁流程／路由跳轉／多個 view + store 互動（如未登入時導去登入頁再導回、加入購物車 → 結帳 → 送出訂單） | Playwright e2e | 這類行為只有在真實導航與元件互相配合下才能觀察到，Vitest 的 jsdom 環境測不出來 |
-| 純視覺／版面調整（Tailwind class、排版） | 都不用，直接開瀏覽器肉眼確認 | 沒有邏輯可斷言，e2e/Vitest 都測不出「好不好看」 |
+| 純視覺／版面調整，且**沒有條件邏輯**（Tailwind class、排版、字體大小、配色微調這種不是由狀態或資料決定的調整） | 都不用，直接開瀏覽器肉眼確認 | 沒有邏輯可斷言，e2e/Vitest 都測不出「好不好看」；但若樣式/顯示是由狀態或資料驅動，不算這類，見上面第一行 |
 | 改動剛好落在既有 spec 涵蓋的流程內 | 只跑對應那一支 spec，不用跑全部 | 保持回饋速度快 |
 
 ## 現況
