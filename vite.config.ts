@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, configDefaults } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 
@@ -13,6 +13,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',  // 模擬瀏覽器 DOM 環境
     globals: true,         // 不需要 import describe/test/expect，直接使用
+    // e2e 用 Playwright 跑，vitest 不要撿 e2e/*.spec.ts（副檔名剛好也是 .spec.ts）
+    exclude: [...configDefaults.exclude, 'e2e/**'],
   },
   build: {
     rollupOptions: {

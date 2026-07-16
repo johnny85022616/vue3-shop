@@ -119,6 +119,7 @@ export function useProductList() {
     loading,
     loadingMore,
     error,
+    total,
     hasMore,
     fetchProducts,
     fetchCategories,

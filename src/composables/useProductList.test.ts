@@ -11,8 +11,8 @@ vi.mock('@/api/product', () => ({
 import * as api from '@/api/product'
 
 const mockProducts = [
-  { id: 1, title: 'Product A', price: 10, rating: 4.5, thumbnail: '', category: 'electronics', description: '' },
-  { id: 2, title: 'Product B', price: 20, rating: 3.8, thumbnail: '', category: 'electronics', description: '' },
+  { id: 1, title: 'Product A', price: 10, rating: 4.5, thumbnail: '', category: 'electronics', description: '', images: [] },
+  { id: 2, title: 'Product B', price: 20, rating: 3.8, thumbnail: '', category: 'electronics', description: '', images: [] },
 ]
 
 const mockCategories = [
@@ -28,7 +28,7 @@ beforeEach(() => {
 
 describe('fetchProducts', () => {
   it('成功載入商品，更新 products / total / hasMore / skip', async () => {
-    vi.mocked(api.getProducts).mockResolvedValue({ products: mockProducts, total: 10 })
+    vi.mocked(api.getProducts).mockResolvedValue({ products: mockProducts, total: 10, skip: 0, limit: 6 })
 
     const { products, total, hasMore, loading, fetchProducts } = useProductList()
     await fetchProducts()
@@ -40,7 +40,7 @@ describe('fetchProducts', () => {
   })
 
   it('商品數量等於 total 時 hasMore 為 false', async () => {
-    vi.mocked(api.getProducts).mockResolvedValue({ products: mockProducts, total: 2 })
+    vi.mocked(api.getProducts).mockResolvedValue({ products: mockProducts, total: 2, skip: 0, limit: 6 })
 
     const { hasMore, fetchProducts } = useProductList()
     await fetchProducts()
@@ -71,7 +71,7 @@ describe('fetchCategories', () => {
 
 describe('fetchProductsByCategory', () => {
   it('依分類載入商品', async () => {
-    vi.mocked(api.getProductsByCategory).mockResolvedValue({ products: mockProducts, total: 2 })
+    vi.mocked(api.getProductsByCategory).mockResolvedValue({ products: mockProducts, total: 2, skip: 0, limit: 6 })
 
     const { products, fetchProductsByCategory } = useProductList()
     await fetchProductsByCategory('electronics')
@@ -83,7 +83,7 @@ describe('fetchProductsByCategory', () => {
 
 describe('fetchSearchProducts', () => {
   it('搜尋後 hasMore 為 false（不支援 infinite scroll）', async () => {
-    vi.mocked(api.searchProducts).mockResolvedValue({ products: mockProducts, total: 2 })
+    vi.mocked(api.searchProducts).mockResolvedValue({ products: mockProducts, total: 2, skip: 0, limit: 6 })
 
     const { hasMore, fetchSearchProducts } = useProductList()
     await fetchSearchProducts('phone')
@@ -95,11 +95,11 @@ describe('fetchSearchProducts', () => {
 describe('loadMore', () => {
   it('追加商品到現有列表', async () => {
     const extraProducts = [
-      { id: 3, title: 'Product C', price: 30, rating: 4.0, thumbnail: '', category: 'electronics', description: '' },
+      { id: 3, title: 'Product C', price: 30, rating: 4.0, thumbnail: '', category: 'electronics', description: '', images: [] },
     ]
     vi.mocked(api.getProducts)
-      .mockResolvedValueOnce({ products: mockProducts, total: 10 })
-      .mockResolvedValueOnce({ products: extraProducts, total: 10 })
+      .mockResolvedValueOnce({ products: mockProducts, total: 10, skip: 0, limit: 6 })
+      .mockResolvedValueOnce({ products: extraProducts, total: 10, skip: 6, limit: 6 })
 
     const { products, loadMore, fetchProducts } = useProductList()
     await fetchProducts()
@@ -110,7 +110,7 @@ describe('loadMore', () => {
   })
 
   it('hasMore 為 false 時不打 API', async () => {
-    vi.mocked(api.getProducts).mockResolvedValue({ products: mockProducts, total: 2 })
+    vi.mocked(api.getProducts).mockResolvedValue({ products: mockProducts, total: 2, skip: 0, limit: 6 })
 
     const { loadMore, fetchProducts } = useProductList()
     await fetchProducts()
