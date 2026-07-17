@@ -29,7 +29,16 @@ apply 階段照 `tasks.md` 一項一項做，但 `tasks.md` 通常不列測試�
 - 邏輯單元這一類量小、單支測試跑很快，**直接在主線自己寫、自己跑、自己修**，不用開 subagent。
 - 分不出來屬於哪一類（例如一個 task 同時搭畫面又帶了一小段邏輯）→ 按「有沒有可以獨立斷言的行為」判斷：有就補 Vitest，沒有就留給 e2e。真的判斷不了再問使用者，不要默默跳過。
 
-## Capability 層級：spec.md 逐條核對，執行交給 subagent
+## Capability 層級：先①跑、再②審，兩支 subagent 接力
+
+一個 capability 底下所有 task 都打勾後，收尾分兩步，**由兩支獨立 subagent 接力**，不要合併成一支：
+
+- **① 跑測試 subagent**：執行整批測試、修 bug 到全綠、回報。（下一節）
+- **② 審覆蓋 reviewer**：①回報全綠後才啟動，讀 `spec.md` + 這次的測試檔，逐條 Scenario 比對有沒有漏測／假覆蓋，回報覆蓋矩陣。（見「② 審覆蓋」節）
+
+**為什麼拆兩支、不塞一支**：①要跑要修，context 塞滿 stack trace，且它為了讓測試變綠可能動過測試——再讓同一支自評「有沒有真的覆蓋 Scenario」就是球員兼裁判。②的價值在**獨立稽核 + 清爽 context 做逐條語意比對**，一合併就沒了。②幾乎只讀、不跑測試，很輕。
+
+## ① 跑測試 subagent：spec.md 逐條核對，執行交給 subagent
 
 一個 capability 底下所有 task 都打勾後：
 
@@ -54,6 +63,26 @@ subagent 每次都是全新的、不記得這次對話，prompt 必須自洽，�
 - 用 `git status --short` / `git diff --name-only` 抓出這次 apply 實際新增/修改的檔案，篩出測試檔（`*.test.ts`、`e2e/*.spec.ts`），把清單寫進 capability 層級 subagent 的 prompt。
 - Vitest 只對這些檔案 `npx vitest run <files...>`；e2e 只對這些檔案 `npx playwright test <files...>`。
 - **不要**在 apply 過程中跑整包 `npm test` 或無參數 `npx playwright test`，主線和 subagent 都不行。全量回歸是合併前另一個獨立步驟，不屬於這份 skill。
+
+## ② 審覆蓋 reviewer：spec 有沒有漏測
+
+**①回報全綠之後**，再開一支**全新、獨立**的 `Agent`（`subagent_type: general-purpose`）當 reviewer。它跟①是不同的 subagent，**不要沿用①、也不要合併**——理由見上面「為什麼拆兩支」。
+
+reviewer 的守備範圍與限制：
+
+- **只審不改、不跑**：它不執行測試（①已確認綠了），也不動任何代碼或測試檔，只讀、只比對、只回報。要補要修都留給主線收到回報後決定。
+- **能抓的**：`spec.md` 已定義、但測試沒覆蓋到的 Scenario（漏測），以及檔案／名字對得上、但 assertion 是套套邏輯或把真東西 mock 掉、沒真的測到該行為的（假覆蓋）。
+- **抓不到的**：`spec.md` 根本沒定義的行為——那是「spec 缺口」，走文件先於代碼那節，不是 reviewer 的事。
+- reviewer 是語意比對（自然語言 Scenario ↔ 代碼 assertion），會有誤判，主線收到回報要自己核一遍再動手，別照單全收。
+
+reviewer 每次都是全新的、不記得這次對話，prompt 必須自洽，至少包含：
+
+- 該 capability 的 `spec.md` 路徑（叫它把每條 Requirement + Scenario 列出來當 ground truth，別讓它自己找）
+- 這次 apply 新增/修改的測試檔清單（明確路徑，同「只跑對應範圍」那份 `git diff` 清單）
+- 要求它**逐條 Scenario** 去測試檔裡找對應 assertion，並讀 assertion 內容判斷是不是真的測到（不是只看檔案存不存在）
+- 要求回報一張**覆蓋矩陣**，欄位固定為：**Scenario｜有對應測試（檔案:行）｜assertion 真的測到**，逐條用 ✅ / ❌ 標記，漏測與假覆蓋要標紅並說明缺什麼
+
+主線收到②的回報後：漏的 Scenario 補測試（要斷言什麼、對應哪個 Scenario 需理解 spec 語意，**這段留主線做**）、假覆蓋的修 assertion。補完的測試若是 e2e 或整批，再交回①那種跑測試 subagent 跑綠——**不在主線自己跑**。
 
 ## 測試沒過怎麼處理
 
@@ -90,7 +119,8 @@ Task 層級（主線自己跑）與 capability 層級（subagent 執行）遵守
 
 **每個 capability 完成前**：
 - [ ] 該 capability 下 `tasks.md` 所有項目已打勾
-- [ ] `spec.md` 每條 Scenario 都有對應測試且都通過（結果來自 subagent 回報，主線沒繞過 subagent 自己跑整批）
+- [ ] ① 跑測試 subagent 回報整批全綠（主線沒繞過 subagent 自己跑整批）
+- [ ] ② 審覆蓋 reviewer 已在①全綠後獨立跑過，回報的覆蓋矩陣沒有未處理的漏測／假覆蓋（是另一支 subagent，不是①）
 - [ ] 這次只跑範圍內的測試，沒把整包當驗證
 - [ ] 整個 apply 過程主線沒執行過任何一次 `npx playwright test`（含寫完 e2e 想先確認 selector）
 
