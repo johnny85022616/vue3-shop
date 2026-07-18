@@ -15,19 +15,31 @@ apply 階段照 `tasks.md` 一項一項做，但 `tasks.md` 通常不列測試�
 
 如果你發現自己已經把某個 task 打勾、卻還沒對它做過下表的判斷，代表 gate 被跳過了：停下來，回去補完再繼續。
 
-**打勾一律用 Edit（局部把 `- [ ]` 改成 `- [x]`），不要用 Write 覆寫整份 `tasks.md`。** 有一支 PostToolUse hook 會在打勾當下強制提醒你自檢，但它只認得 Edit/MultiEdit 的局部改動；用 Write 整檔覆寫會讓那道兜底靜默失效。
+**打勾一律用 Edit（局部把 `- [ ]` 改成 `- [x]`），不要用 Write 覆寫整份 `tasks.md`。** 打勾那一行**必須同時帶上判定 tag**（格式見下節）。有一支 **PreToolUse hook 會在打勾生效前攔截**：沒帶 tag、或 tag=`unit` 但對應測試沒跑綠，一律 **deny（擋下打勾，框維持 `- [ ]`）**；tag=`e2e-deferred` / `ui-skeleton` 則放行。它只認得 Edit/MultiEdit 的局部改動——用 Write 整檔覆寫會讓這道 gate 靜默失效。
+
+hook 只做「機械」把關（tag 存在、`unit` 測試跑綠），它**不判斷判定誠不誠實**（例如把該 `unit` 的硬標成 `e2e-deferred` 混過去）——那屬語意問題，交給 capability 階段的審覆蓋 reviewer，不在 task 層 hook 的責任範圍。
 
 ## Task 層級：打勾前先分類，再決定動作
 
-每做完一個 task，**在改勾之前**先判斷它屬於哪一類：
+每做完一個 task，**在改勾之前**先判斷它屬於哪一類，並在打勾那行標上對應的判定 tag：
 
-| task 類型 | 判斷準則（例子） | 打勾前必須做的事 |
+> **「該歸哪一層」的判準本表不複述，一律依 [e2e skill](../e2e/SKILL.md) 的「何時用 e2e」——核心問題是這個行為能不能在 jsdom 驗證。本表只定義每個 tag 對應的 gate 動作。**
+
+| 判定 tag | 對應 e2e skill 的哪一類 | 打勾前必須做的事 |
 | --- | --- | --- |
-| **獨立可測的邏輯單元** | composable / store action / util function（`useProductList.ts`、`cart.ts` 這類） | 補一支 **colocated** 的 Vitest `*.test.ts`，`npx vitest run <path>` **只跑這一支**、通過後才打勾 |
-| **純畫面骨架** | 沒有獨立邏輯的 view/元件搭建（「建立 XxxView.vue 骨架」這類） | 不逐一補，留到 capability 層級用 e2e 涵蓋，可直接打勾 |
+| `<!-- 判定:unit｜測試:<路徑> -->` | 能在 jsdom 驗證的行為：純邏輯（function／computed／store getter），或單一元件 mount 就能斷言的渲染／互動 | 補一支 **colocated** 的 `*.test.ts`（純邏輯用 Vitest；元件用 `@vue/test-utils` mount，皆跑 jsdom）。打勾時 hook 會**自己跑那支** `npx vitest run <路徑>`，綠才放行 |
+| `<!-- 判定:e2e-deferred -->` | 只有真實瀏覽器／跨頁跳轉才驗得出來：跨頁流程／路由跳轉／多 view + store 互動 | task 層不寫，留到 capability 層級用 e2e 補 |
+| `<!-- 判定:ui-skeleton -->` | 純視覺／版面且**無條件邏輯**（e2e skill 的「肉眼確認」列） | 免測，可直接打勾 |
 
-- 邏輯單元這一類量小、單支測試跑很快，**直接在主線自己寫、自己跑、自己修**，不用開 subagent。
-- 分不出來屬於哪一類（例如一個 task 同時搭畫面又帶了一小段邏輯）→ 按「有沒有可以獨立斷言的行為」判斷：有就補 Vitest，沒有就留給 e2e。真的判斷不了再問使用者，不要默默跳過。
+打勾行範例（tag 與打勾放同一個 Edit）：
+```
+- [x] 1.1 建立 wishlist store … <!-- 判定:unit｜測試:src/stores/wishlist.test.ts -->
+- [x] 4.1 建立 WishlistView 骨架 … <!-- 判定:ui-skeleton -->
+```
+
+- 邏輯單元這一類量小、單支測試跑很快，**主線自己寫測試**；開發時想自己跑來 debug 也行，但**打勾當下的權威驗證是 hook 那一次**（它讀 exit code、不經過我，紅就 deny）。
+- 分不出來屬於哪一類（例如一個 task 同時搭畫面又帶了一小段邏輯）→ 按「有沒有可以獨立斷言的行為」判斷：有就標 `unit` 補 Vitest，沒有就標 `ui-skeleton` / `e2e-deferred`。真的判斷不了再問使用者，不要默默跳過。
+- **判定要誠實**：hook 擋不住「亂標分類跳過測試」（例如把該 `unit` 的標 `e2e-deferred`）。這種 mislabel 由 capability 階段的審覆蓋 reviewer 抓，但別靠它——task 層照實標是你的責任。
 
 ## Capability 層級：先①跑、再②審，兩支 subagent 接力
 
@@ -114,8 +126,8 @@ Task 層級（主線自己跑）與 capability 層級（subagent 執行）遵守
 ## 自我檢查
 
 **每個 task 打勾前**：
-- [ ] 已對這個 task 做過上面的決策表分類
-- [ ] 若是邏輯單元，已補 colocated `*.test.ts` 且 `npx vitest run <path>` 這一支通過
+- [ ] 已對這個 task 做過上面的決策表分類，並在打勾行標上判定 tag（`unit｜測試:<路徑>` / `e2e-deferred` / `ui-skeleton`）
+- [ ] 若標 `unit`，已寫好 colocated `*.test.ts`（打勾時 hook 會自己跑它、綠才放行）
 
 **每個 capability 完成前**：
 - [ ] 該 capability 下 `tasks.md` 所有項目已打勾
