@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'vitest'
+import { describe, test, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useCartStore } from './cart'
 
@@ -35,6 +35,9 @@ describe('useCartStore', () => {
 
   // 覆蓋 line 17–18（initializeCart 的 catch 分支）
   test('localStorage 格式錯誤時 items 應為空', () => {
+    // 這個測試故意餵壞 JSON，cart.ts 的 catch 會 console.error；
+    // 靜音以免污染測試輸出（不影響測試邏輯）
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     localStorage.setItem('cart', 'invalid json')
     const cart = useCartStore()
 
