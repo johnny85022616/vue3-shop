@@ -41,6 +41,10 @@ hook 只做「機械」把關（tag 存在、`unit` 測試跑綠），它**不�
 - 分不出來屬於哪一類（例如一個 task 同時搭畫面又帶了一小段邏輯）→ 按「有沒有可以獨立斷言的行為」判斷：有就標 `unit` 補 Vitest，沒有就標 `ui-skeleton` / `e2e-deferred`。真的判斷不了再問使用者，不要默默跳過。
 - **判定要誠實**：hook 擋不住「亂標分類跳過測試」（例如把該 `unit` 的標 `e2e-deferred`）。這種 mislabel 由 capability 階段的審覆蓋 reviewer 抓，但別靠它——task 層照實標是你的責任。
 
+## 每個 task group 完成後輸出確認表
+
+每做完 `tasks.md` 一個 `##` group（該 group 所有項目都打勾後），輸出一張表格讓使用者確認，再繼續下一個 group。欄位固定為：**Task｜分類判斷｜有無寫測試｜有無跑測試**，逐項用 ✅ / ❌不需要 / ⚠️ 標記，把上面決策表的判斷結果**外顯**出來，不要只用一句文字帶過。這是讓使用者能一眼稽核 gate 有沒有被跳過的關卡。
+
 ## Capability 層級：先①跑、再②審，兩支 subagent 接力
 
 一個 capability 底下所有 task 都打勾後，收尾分兩步，**由兩支獨立 subagent 接力**，不要合併成一支：
@@ -68,13 +72,8 @@ subagent 每次都是全新的、不記得這次對話，prompt 必須自洽，�
 - 要跑哪些測試檔案（明確路徑，見「只跑對應範圍」，別讓它自己找）
 - 跑測試的指令（`npx vitest run <files...>` 或 `npx playwright test <files...>`）
 - 下方「測試沒過怎麼處理」的判斷規則
-- 要求回報：測試最後有沒有過、中途修了什麼 bug、卡在什麼判斷
-
-## 只跑對應範圍，不跑全部
-
-- 用 `git status --short` / `git diff --name-only` 抓出這次 apply 實際新增/修改的檔案，篩出測試檔（`*.test.ts`、`e2e/*.spec.ts`），把清單寫進 capability 層級 subagent 的 prompt。
-- Vitest 只對這些檔案 `npx vitest run <files...>`；e2e 只對這些檔案 `npx playwright test <files...>`。
-- **不要**在 apply 過程中跑整包 `npm test` 或無參數 `npx playwright test`，主線和 subagent 都不行。全量回歸是合併前另一個獨立步驟，不屬於這份 skill。
+- **拿不準是機械 bug 還是需求問題時，一律當需求問題回報、不要自己修**：這條界線本來就會誤判，而「把需求問題誤當機械 bug 自己修綠」是隱形的雷（沒人知道它替產品做了決定），「把機械 bug 誤當需求問題退回來問」頂多多一次無害往返。歪就往保守的那邊歪。
+- 要求回報：測試最後有沒有過、中途修了什麼 bug、卡在什麼判斷。**「修了什麼」要具體到改了哪個檔哪一行、為什麼這樣改**，不准只寫「修好了」——這樣主線讀報告時才有機會發現某個「修法」其實動到了產品行為，把它撈回來確認。
 
 ## ② 審覆蓋 reviewer：spec 有沒有漏測
 
@@ -95,6 +94,12 @@ reviewer 每次都是全新的、不記得這次對話，prompt 必須自洽，�
 - 要求回報一張**覆蓋矩陣**，欄位固定為：**Scenario｜有對應測試（檔案:行）｜assertion 真的測到**，逐條用 ✅ / ❌ 標記，漏測與假覆蓋要標紅並說明缺什麼
 
 主線收到②的回報後：漏的 Scenario 補測試（要斷言什麼、對應哪個 Scenario 需理解 spec 語意，**這段留主線做**）、假覆蓋的修 assertion。補完的測試若是 e2e 或整批，再交回①那種跑測試 subagent 跑綠——**不在主線自己跑**。
+
+## 只跑對應範圍，不跑全部
+
+- 用 `git status --short` / `git diff --name-only` 抓出這次 apply 實際新增/修改的檔案，篩出測試檔（`*.test.ts`、`e2e/*.spec.ts`），把清單寫進 capability 層級 subagent 的 prompt。
+- Vitest 只對這些檔案 `npx vitest run <files...>`；e2e 只對這些檔案 `npx playwright test <files...>`。
+- **不要**在 apply 過程中跑整包 `npm test` 或無參數 `npx playwright test`，主線和 subagent 都不行。全量回歸是合併前另一個獨立步驟，不屬於這份 skill。
 
 ## 測試沒過怎麼處理
 
@@ -118,10 +123,6 @@ Task 層級（主線自己跑）與 capability 層級（subagent 執行）遵守
 4. `proposal.md`：只有跟既有描述矛盾時才改，單純補細節不用動。
 
 文件更新完才回頭改代碼。理由：spec-driven 的精神是「先定規格、代碼照規格走」，先動代碼再補文件等於把 spec.md/design.md/tasks.md 變成事後紀錄。
-
-## 每個 task group 完成後輸出確認表
-
-每做完 `tasks.md` 一個 `##` group（該 group 所有項目都打勾後），輸出一張表格讓使用者確認，再繼續下一個 group。欄位固定為：**Task｜分類判斷｜有無寫測試｜有無跑測試**，逐項用 ✅ / ❌不需要 / ⚠️ 標記，把上面決策表的判斷結果**外顯**出來，不要只用一句文字帶過。這是讓使用者能一眼稽核 gate 有沒有被跳過的關卡。
 
 ## 自我檢查
 
