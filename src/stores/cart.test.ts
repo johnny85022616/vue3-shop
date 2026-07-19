@@ -60,6 +60,23 @@ describe('useCartStore', () => {
     expect(cart.items[0].quantity).toBe(3)
   })
 
+  // 覆蓋 line 47（新增時 quantity 為 0/undefined 時 fallback 為 1）
+  test('新增商品未給 quantity 時預設為 1', () => {
+    const cart = useCartStore()
+    cart.addItem({ ...mockProduct, quantity: 0 })
+
+    expect(cart.items[0].quantity).toBe(1)
+  })
+
+  // 覆蓋 line 39（累加時 quantity 為 0/undefined 時 fallback 為 1）
+  test('累加商品未給 quantity 時預設加 1', () => {
+    const cart = useCartStore()
+    cart.addItem(mockProduct)
+    cart.addItem({ ...mockProduct, quantity: 0 })
+
+    expect(cart.items[0].quantity).toBe(2)
+  })
+
   // 覆蓋 line 52–54（removeItem）
   test('移除商品後 items 應為空', () => {
     const cart = useCartStore()
