@@ -24,4 +24,4 @@ description: 啟動 vue3-shop 的 dev server 並執行 Playwright e2e 測試；�
 
 ## 現況
 
-- 目前只有兩支 spec：[login.spec.ts](../../../e2e/login.spec.ts)（登入流程）、[shopping-flow.spec.ts](../../../e2e/shopping-flow.spec.ts)（瀏覽商品 → 加入購物車 → 結帳 → 送出訂單）。
+- 目前只有一支 spec：[cart.spec.ts](../../../e2e/cart.spec.ts)（cart 持久化：已登入狀態下加入商品，重整瀏覽器後購物車仍在）。這是專案第一支 e2e。
