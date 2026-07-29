@@ -48,7 +48,7 @@
                 <RouterLink :to="`/products/${item.id}`" class="flex-1 text-sm font-medium text-ink leading-snug hover:text-gold transition-colors duration-200 line-clamp-2">
                   {{ item.title }}
                 </RouterLink>
-                <button class="text-muted hover:text-ink transition-colors duration-200 flex-shrink-0" @click="removeItem(item.id)">
+                <button aria-label="移除" class="text-muted hover:text-ink transition-colors duration-200 flex-shrink-0" @click="removeItem(item.id)">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -87,7 +87,7 @@
                 </div>
               </div>
               <div class="text-sm font-medium text-ink text-right">${{ (item.price * item.quantity).toFixed(2) }}</div>
-              <button class="text-muted hover:text-ink transition-colors duration-200" @click="removeItem(item.id)">
+              <button aria-label="移除" class="text-muted hover:text-ink transition-colors duration-200" @click="removeItem(item.id)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
