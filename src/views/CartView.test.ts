@@ -39,9 +39,10 @@ function mountCart(items: CartItem[]) {
   return { wrapper, store }
 }
 
-// 依按鈕文字取數量加減鈕（手機版與桌機版各一組，故同文字會有多顆）
+// 依 aria-label 取數量加減鈕（手機版與桌機版各一顆，故同 label 會有多顆）
 function qtyButtons(wrapper: ReturnType<typeof mountCart>['wrapper'], sign: '+' | '−') {
-  return wrapper.findAll('button').filter((b) => b.text().trim() === sign)
+  const label = sign === '+' ? '增加數量' : '減少數量'
+  return wrapper.findAll(`button[aria-label="${label}"]`)
 }
 
 // 移除鈕：以 aria-label 定位（手機版與桌機版各一顆）

@@ -59,9 +59,9 @@
                 <span class="text-sm text-muted">單價 ${{ item.price.toFixed(2) }}</span>
                 <div class="flex-1 flex justify-center">
                   <div class="flex items-center border border-border">
-                    <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="decreaseQty(item)">−</button>
+                    <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" aria-label="減少數量" @click="decreaseQty(item)">−</button>
                     <span class="w-8 text-center text-sm font-medium text-ink">{{ item.quantity }}</span>
-                    <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="increaseQty(item)">+</button>
+                    <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" aria-label="增加數量" @click="increaseQty(item)">+</button>
                   </div>
                 </div>
                 <span class="text-sm font-medium text-ink">${{ (item.price * item.quantity).toFixed(2) }}</span>
@@ -81,9 +81,9 @@
               <div class="text-sm text-muted text-right">${{ item.price.toFixed(2) }}</div>
               <div class="flex items-center justify-center">
                 <div class="flex items-center border border-border">
-                  <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="decreaseQty(item)">−</button>
+                  <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" aria-label="減少數量" @click="decreaseQty(item)">−</button>
                   <span class="w-8 text-center text-sm font-medium text-ink">{{ item.quantity }}</span>
-                  <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" @click="increaseQty(item)">+</button>
+                  <button class="w-8 h-8 flex items-center justify-center text-ink hover:bg-border transition-colors duration-200" aria-label="增加數量" @click="increaseQty(item)">+</button>
                 </div>
               </div>
               <div class="text-sm font-medium text-ink text-right">${{ (item.price * item.quantity).toFixed(2) }}</div>
