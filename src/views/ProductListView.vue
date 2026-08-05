@@ -17,6 +17,7 @@
         <input
           v-model="searchQuery"
           type="text"
+          aria-label="搜尋商品"
           placeholder="搜尋商品..."
           class="w-full sm:w-80 border border-border bg-cream text-ink text-sm px-4 py-2.5 outline-none focus:border-ink transition-colors duration-200 placeholder:text-muted"
           @keyup.enter="doSearch"
