@@ -15,7 +15,8 @@ let categoriesCache: Category[] | null = null
 export function useProductList() {
   const products = ref<Product[]>([])
   const categories = ref<Category[]>(categoriesCache ?? [])
-  const loading = ref(false)
+  const loading = ref(false)           // 只代表「商品」是否載入中
+  const categoriesLoading = ref(false) // 分類清單另計，不可與商品共用（見下方 fetchCategories）
   const loadingMore = ref(false)
   const error = ref<string | null>(null)
   const skip = ref(0)            // 下次打 API 要跳過的筆數（已載入的總筆數）
@@ -29,7 +30,9 @@ export function useProductList() {
       categories.value = categoriesCache
       return
     }
-    loading.value = true
+    // 用獨立旗標：分類與商品是並發的兩支請求，若共用 loading，分類先回來就會把
+    // 商品的載入中狀態收掉，畫面會在商品還沒到時閃一下「找不到符合的商品」。
+    categoriesLoading.value = true
     error.value = null
     try {
       const fetched = await getCategories()
@@ -38,7 +41,7 @@ export function useProductList() {
     } catch (e) {
       error.value = e instanceof Error ? e.message : '載入分類失敗'
     } finally {
-      loading.value = false
+      categoriesLoading.value = false
     }
   }
 
@@ -117,6 +120,7 @@ export function useProductList() {
     products,
     categories,
     loading,
+    categoriesLoading,
     loadingMore,
     error,
     total,

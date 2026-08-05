@@ -79,7 +79,8 @@ import Navbar from '@/components/Navbar.vue'
 import CategorySection from '@/components/CategorySection.vue'
 import { useProductList } from '@/composables/useProductList'
 
-const { categories, loading, error, fetchCategories } = useProductList()
+// 首頁只載分類，載入中狀態就看分類那支（商品由各 CategorySection 自己載）
+const { categories, categoriesLoading: loading, error, fetchCategories } = useProductList()
 
 onMounted(() => {
   fetchCategories()

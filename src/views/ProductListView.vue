@@ -31,6 +31,7 @@
           <button
             class="shrink-0 text-xs font-medium tracking-[0.05em] px-4 py-2 border transition-colors duration-200"
             :class="activeCategory === '' ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border'"
+            aria-label="分類：全部"
             @click="selectCategory('')"
           >全部</button>
           <button
@@ -38,6 +39,7 @@
             :key="cat.slug"
             class="shrink-0 text-xs font-medium tracking-[0.05em] px-4 py-2 border capitalize transition-colors duration-200"
             :class="activeCategory === cat.slug ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border'"
+            :aria-label="`分類：${cat.name}`"
             @click="selectCategory(cat.slug)"
           >{{ cat.name }}</button>
           <button
@@ -51,6 +53,7 @@
           <button
             class="text-xs font-medium tracking-[0.05em] px-4 py-1.5 border transition-colors duration-200"
             :class="activeCategory === '' ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border hover:border-ink'"
+            aria-label="分類：全部"
             @click="selectCategory('')"
           >全部</button>
           <button
@@ -58,6 +61,7 @@
             :key="cat.slug"
             class="text-xs font-medium tracking-[0.05em] px-4 py-1.5 border capitalize transition-colors duration-200"
             :class="activeCategory === cat.slug ? 'bg-ink text-cream border-ink' : 'bg-cream text-ink border-border hover:border-ink'"
+            :aria-label="`分類：${cat.name}`"
             @click="selectCategory(cat.slug)"
           >{{ cat.name }}</button>
         </div>
@@ -72,7 +76,7 @@
       />
 
       <!-- 載入中 skeleton -->
-      <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div v-if="loading" role="status" aria-label="載入中" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
         <div v-for="n in 8" :key="n" class="animate-pulse bg-border aspect-[3/4]" />
       </div>
 
