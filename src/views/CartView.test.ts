@@ -39,15 +39,15 @@ function mountCart(items: CartItem[]) {
   return { wrapper, store }
 }
 
-// 依 aria-label 取數量加減鈕（手機版與桌機版各一顆，故同 label 會有多顆）
-function qtyButtons(wrapper: ReturnType<typeof mountCart>['wrapper'], sign: '+' | '−') {
+// 依 aria-label 取數量加減鈕（手機版與桌機版各一顆，get 取當前渲染的第一顆；找不到即拋錯）
+function qtyButton(wrapper: ReturnType<typeof mountCart>['wrapper'], sign: '+' | '−') {
   const label = sign === '+' ? '增加數量' : '減少數量'
-  return wrapper.findAll(`button[aria-label="${label}"]`)
+  return wrapper.get(`button[aria-label="${label}"]`)
 }
 
-// 移除鈕：以 aria-label 定位（手機版與桌機版各一顆）
-function removeButtons(wrapper: ReturnType<typeof mountCart>['wrapper']) {
-  return wrapper.findAll('button[aria-label="移除"]')
+// 移除鈕：以 aria-label 定位（手機版與桌機版各一顆，get 取第一顆；找不到即拋錯）
+function removeButton(wrapper: ReturnType<typeof mountCart>['wrapper']) {
+  return wrapper.get('button[aria-label="移除"]')
 }
 
 // 目前渲染出的所有連結目的地
@@ -122,7 +122,7 @@ describe('調整商品數量', () => {
   it('點「+」：該商品數量加一，總金額即時更新', async () => {
     const { wrapper, store } = mountCart([makeItem({ id: 1, price: 100, quantity: 1 })])
 
-    await qtyButtons(wrapper, '+')[0].trigger('click')
+    await qtyButton(wrapper, '+').trigger('click')
 
     expect(store.items[0].quantity).toBe(2)
     expect(wrapper.text()).toContain('200.00') // 總金額更新
@@ -132,7 +132,7 @@ describe('調整商品數量', () => {
   it('數量為 1 時點「−」：該商品移除，畫面轉為空車', async () => {
     const { wrapper, store } = mountCart([makeItem({ id: 1, quantity: 1 })])
 
-    await qtyButtons(wrapper, '−')[0].trigger('click')
+    await qtyButton(wrapper, '−').trigger('click')
 
     expect(store.items).toHaveLength(0)
     expect(wrapper.text()).toContain('購物車是空的')
@@ -148,7 +148,7 @@ describe('移除商品', () => {
       makeItem({ id: 2, title: '鍵盤', price: 50, quantity: 1 }),
     ])
 
-    await removeButtons(wrapper)[0].trigger('click') // 第一顆移除鈕對應 id 1
+    await removeButton(wrapper).trigger('click') // get 取第一顆移除鈕，對應 id 1
 
     expect(store.items.map((i) => i.id)).toEqual([2])
     expect(wrapper.text()).not.toContain('滑鼠')
