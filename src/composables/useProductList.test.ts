@@ -116,6 +116,7 @@ describe('依分類載入商品', () => {
     expect(error.value).toBeNull()
   })
 
+  // Scenario: 商品載入失敗（同一條 Scenario 的分類路徑——WHEN API 呼叫失敗，這裡是分類那支）
   it('fetchProductsByCategory 失敗：error 帶入錯誤訊息', async () => {
     vi.mocked(api.getProductsByCategory).mockRejectedValue(new Error('分類壞了'))
     const { error, fetchProductsByCategory } = useProductList()
@@ -177,6 +178,7 @@ describe('搜尋商品', () => {
     expect(total.value).toBe(0)
   })
 
+  // Scenario: 商品載入失敗（同一條 Scenario 的搜尋路徑）
   it('搜尋失敗：error 帶入錯誤訊息', async () => {
     vi.mocked(api.searchProducts).mockRejectedValue(new Error('搜尋壞了'))
     const { error, fetchSearchProducts } = useProductList()
@@ -187,7 +189,10 @@ describe('搜尋商品', () => {
   })
 })
 
-// 分頁載入（spec 未明列，屬實作的無限捲動機制；哨兵觸發本身由 view 負責）
+// ⚠️ 非 spec Scenario：本組三個 case 都不對應 product-list spec 的任何 Scenario。
+// 無限捲動分頁是實作自帶的機制（LIMIT=6 + hasMore + skip），spec 目前沒定義它，
+// 屬已知的 spec 缺口。留著是因為 loadMore 的 skip/hasMore 算術很容易改壞，且它與
+// 「選擇分類／選擇全部」共用同一組分頁狀態。哨兵何時觸發 loadMore 由 view 負責。
 describe('載入更多', () => {
   it('第一頁未載完時 hasMore 為 true，loadMore 追加下一批後轉 false', async () => {
     const firstPage = [makeProduct({ id: 1 }), makeProduct({ id: 2 })]
@@ -235,8 +240,12 @@ describe('載入更多', () => {
   })
 })
 
-// 分類清單（供「依分類篩選商品」的標籤列使用）
+// 分類清單：product-list spec 的「依分類篩選商品」預設有分類標籤可點，但沒有為
+// 「分類清單本身怎麼載入」定義 Scenario，所以本組除了最後兩個 case 之外都不對應
+// Scenario——是支撐那條 Requirement 的前置資料，以及一個實作自帶的快取機制。
+// （首頁的「分類載入中／失敗」有自己的 Scenario，歸 home capability，不在這支。）
 describe('載入分類清單', () => {
+  // 非 spec Scenario：「依分類篩選商品」的分類標籤資料來源
   it('fetchCategories：取得分類並填入 categories', async () => {
     vi.mocked(api.getCategories).mockResolvedValue([makeCategory('beauty', 'Beauty')])
     const { categories, error, fetchCategories } = useProductList()
@@ -247,6 +256,7 @@ describe('載入分類清單', () => {
     expect(error.value).toBeNull()
   })
 
+  // 非 spec Scenario：module-level 快取是實作決策（整個 app 生命週期只打一次分類 API）
   it('快取：第二個 useProductList 實例直接用快取，不重複打分類 API', async () => {
     vi.mocked(api.getCategories).mockResolvedValue([makeCategory('beauty', 'Beauty')])
 
@@ -278,6 +288,8 @@ describe('載入分類清單', () => {
     expect(loading.value).toBe(false)
   })
 
+  // 非 spec Scenario：product-list spec 只定義「商品」載入失敗；分類載入失敗要顯示什麼
+  // 是 home spec 的「分類載入失敗」，這裡只鎖住 composable 有把錯誤訊息接出來
   it('fetchCategories 失敗：error 帶入錯誤訊息，categories 保持空', async () => {
     vi.mocked(api.getCategories).mockRejectedValue(new Error('分類載入失敗'))
     const { categories, error, fetchCategories } = useProductList()
