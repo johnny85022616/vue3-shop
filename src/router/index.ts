@@ -63,6 +63,12 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/testRadioCheckbox',
+    name: 'testRadioCheckbox',
+    component: () => import('../views/testRadioCheckbox.vue'),
+    meta: { title: '測試頁 | vue3-shop', description: 'checkbox 綁定測試頁' }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
